@@ -4,11 +4,11 @@ Usage: python search_ads.py "search term"
 
 Supported sites:
 
-Le Bon Coin (FR)
-Marktplaats (NL)
-Kleinanzeigen (DE)
-Audiofanzine (FR)
-Subito (IT)
-Ricardo (CH)
-Mercatinomusicale (IT)
-Soudns Market (ES)
+* Le Bon Coin (FR)
+*  Marktplaats (NL)
+* Kleinanzeigen (DE)
+* Audiofanzine (FR)
+* Subito (IT)
+* Ricardo (CH)
+* Mercatinomusicale (IT)
+* Sounds Market (ES)
