@@ -28,7 +28,7 @@ Mercatino Musicale (IT) · Sounds Market (ES)
 
 **General marketplaces** (deep-linked to the music category where the site has one):
 Leboncoin (FR) · Kleinanzeigen (DE) · Marktplaats (NL) · 2dehands (BE) · Subito (IT) ·
-Wallapop (ES) · Milanuncios (ES) · Ricardo (CH) · Tutti (CH) · Willhaben (AT) ·
+Wallapop (ES) · Milanuncios (ES) · Ricardo (CH) · Willhaben (AT) ·
 Blocket (SE) · Tori (FI) · Finn (NO) · DBA (DK) · OLX (PL) · Gumtree (UK) ·
 DoneDeal (IE) · Bazoš (CZ)
 
