@@ -1,6 +1,6 @@
 # EU Music Gear Search
 
-A tiny, hand-coded web page that searches used **musical instruments and audio gear**
+A tiny, web page that searches used **musical instruments and audio gear**
 across ~20 European classifieds and marketplaces at once. Type a make or model and it
 lines up a deep link straight into the results on every site.
 
