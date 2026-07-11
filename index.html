@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EU Music Gear Search</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎸</text></svg>">
+<style>
+  :root {
+    --bg: #faf9f7;
+    --ink: #1c1a17;
+    --muted: #6b655c;
+    --line: #e6e2da;
+    --accent: #9a3b2e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .tagline {
+    color: var(--muted);
+    margin: 0 0 24px;
+    font-size: 15px;
+  }
+  form { display: flex; gap: 8px; margin-bottom: 8px; }
+  #q {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 17px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+  }
+  #q:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  button {
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  button:hover { background: #822f24; }
+  #openall {
+    background: #fff;
+    color: var(--accent);
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  #openall:hover { background: #f2ece6; }
+  .controls { margin-bottom: 28px; min-height: 34px; }
+  h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 28px 0 8px;
+    font-weight: 600;
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li a {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid transparent;
+  }
+  li a:hover { background: #fff; border-color: var(--line); }
+  .flag { font-size: 18px; width: 24px; }
+  .name { font-weight: 600; }
+  .host { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .empty { color: var(--muted); font-style: italic; padding: 12px; }
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>🎸 EU Music Gear Search</h1>
+  <p class="tagline">Type a make or model, then jump straight into the results on every marketplace at once.</p>
+
+  <form id="search">
+    <input id="q" placeholder="e.g. Roland Juno-60" autocomplete="off" autofocus>
+    <button type="submit">Search</button>
+  </form>
+  <div class="controls"><button id="openall" type="button" hidden>Open all in tabs</button></div>
+
+  <div id="results"></div>
+
+  <footer>
+    No tracking, no accounts, no server — this page just builds the search links for you.
+    Add a marketplace by editing one line of
+    <a href="https://github.com/charlesvestal/eu-classified-search" target="_blank" rel="noopener">the source</a>.
+  </footer>
+</main>
+
+<script>
+// Add a marketplace: drop one line into this list.
+//   type "music"   = specialist gear marketplace, or pre-filtered to instruments
+//   type "general" = general classifieds (music category where the site has one)
+// url(q) receives the raw query and returns the deep link to that site's results.
+const enc  = encodeURIComponent;                                   // query params: spaces -> %20
+const dash = q => q.trim().toLowerCase().split(/\s+/).map(enc).join("-"); // slug paths: foo-bar
+const plus = q => q.trim().split(/\s+/).map(enc).join("+");         // + separated paths: foo+bar
+
+const sites = [
+  // --- Music specialists (results are already gear / instruments) ---
+  { type: "music", flag: "🌍", name: "Reverb",            url: q => `https://reverb.com/marketplace?query=${enc(q)}` },
+  { type: "music", flag: "🌍", name: "eBay · Instruments", url: q => `https://www.ebay.com/sch/i.html?_nkw=${enc(q)}&_sacat=619` },
+  { type: "music", flag: "🇫🇷", name: "Audiofanzine",      url: q => `https://fr.audiofanzine.com/recherche/${enc(q)}.html` },
+  { type: "music", flag: "🇮🇹", name: "Mercatino Musicale", url: q => `https://www.mercatinomusicale.com/ann/search.asp?ns=1&kw=${enc(q)}` },
+  { type: "music", flag: "🇪🇸", name: "Sounds Market",     url: q => `https://soundsmarket.com/servicios/compraventa?clave=${enc(q)}` },
+
+  // --- General marketplaces (deep-linked to the music category where possible) ---
+  { type: "general", flag: "🇫🇷", name: "Leboncoin",   url: q => `https://www.leboncoin.fr/recherche?category=54&text=${enc(q)}` },
+  { type: "general", flag: "🇩🇪", name: "Kleinanzeigen", url: q => `https://www.kleinanzeigen.de/s-musikinstrumente/${dash(q)}/k0c74` },
+  { type: "general", flag: "🇳🇱", name: "Marktplaats",  url: q => `https://www.marktplaats.nl/l/muziek-en-instrumenten/q/${plus(q)}/` },
+  { type: "general", flag: "🇧🇪", name: "2dehands",     url: q => `https://www.2dehands.be/q/${enc(q)}/` },
+  { type: "general", flag: "🇮🇹", name: "Subito",       url: q => `https://www.subito.it/annunci-italia/vendita/usato/?q=${enc(q)}` },
+  { type: "general", flag: "🇪🇸", name: "Wallapop",     url: q => `https://www.wallapop.com/search?keywords=${enc(q)}` },
+  { type: "general", flag: "🇪🇸", name: "Milanuncios",  url: q => `https://www.milanuncios.com/anuncios/?s=${enc(q)}` },
+  { type: "general", flag: "🇨🇭", name: "Ricardo",      url: q => `https://www.ricardo.ch/de/s/${enc(q)}/` },
+  { type: "general", flag: "🇨🇭", name: "Tutti",        url: q => `https://www.tutti.ch/de/li/ganze-schweiz?query=${enc(q)}` },
+  { type: "general", flag: "🇦🇹", name: "Willhaben",    url: q => `https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=${enc(q)}` },
+  { type: "general", flag: "🇸🇪", name: "Blocket",      url: q => `https://www.blocket.se/annonser/hela_sverige?q=${enc(q)}` },
+  { type: "general", flag: "🇫🇮", name: "Tori",         url: q => `https://www.tori.fi/koko_suomi?q=${enc(q)}` },
+  { type: "general", flag: "🇳🇴", name: "Finn",         url: q => `https://www.finn.no/bap/forsale/search.html?q=${enc(q)}` },
+  { type: "general", flag: "🇩🇰", name: "DBA",          url: q => `https://www.dba.dk/soeg/?soeg=${enc(q)}` },
+  { type: "general", flag: "🇵🇱", name: "OLX",          url: q => `https://www.olx.pl/d/oferty/q-${dash(q)}/` },
+  { type: "general", flag: "🇬🇧", name: "Gumtree",      url: q => `https://www.gumtree.com/search?search_category=all&q=${enc(q)}` },
+  { type: "general", flag: "🇮🇪", name: "DoneDeal",     url: q => `https://www.donedeal.ie/all?words=${enc(q)}` },
+  { type: "general", flag: "🇨🇿", name: "Bazoš",        url: q => `https://www.bazos.cz/search.php?hledat=${enc(q)}&rubriky=www` },
+];
+
+const form    = document.getElementById("search");
+const input   = document.getElementById("q");
+const results = document.getElementById("results");
+const openAll = document.getElementById("openall");
+
+function hostOf(url) {
+  return url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
+}
+
+function group(title, list, query) {
+  const items = list.map(s => {
+    const href = s.url(query);
+    return `<li><a href="${href}" target="_blank" rel="noopener">
+      <span class="flag">${s.flag}</span>
+      <span class="name">${s.name}</span>
+      <span class="host">${hostOf(href)}</span></a></li>`;
+  }).join("");
+  return `<h2>${title}</h2><ul>${items}</ul>`;
+}
+
+function render(query) {
+  query = query.trim();
+  if (!query) {
+    results.innerHTML = `<p class="empty">Enter a search above to line up every marketplace.</p>`;
+    openAll.hidden = true;
+    return;
+  }
+  const music   = sites.filter(s => s.type === "music");
+  const general = sites.filter(s => s.type === "general");
+  results.innerHTML =
+    group("Music specialists", music, query) +
+    group("General marketplaces", general, query);
+  openAll.hidden = false;
+}
+
+// Share/bookmark support: the query lives in the URL hash (#roland+juno-60).
+function currentQueryFromHash() {
+  try { return decodeURIComponent(location.hash.slice(1)); }
+  catch { return ""; }
+}
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  location.hash = enc(input.value.trim());
+  render(input.value);
+});
+
+input.addEventListener("input", () => render(input.value));
+
+openAll.addEventListener("click", () => {
+  for (const s of sites) window.open(s.url(input.value.trim()), "_blank", "noopener");
+});
+
+window.addEventListener("hashchange", () => {
+  const q = currentQueryFromHash();
+  if (q !== input.value) { input.value = q; render(q); }
+});
+
+// On load, restore any query from the URL.
+input.value = currentQueryFromHash();
+render(input.value);
+</script>
+</body>
+</html>
